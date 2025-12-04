@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
@@ -40,10 +40,14 @@ export async function POST(request: NextRequest) {
         };
 
         // Sign token
+        const options: SignOptions = {
+            expiresIn: (process.env.JWT_EXPIRY || '7d') as any
+        };
+
         const token = jwt.sign(
             payload,
             process.env.JWT_SECRET!,
-            { expiresIn: process.env.JWT_EXPIRY || '7d' }
+            options
         );
 
         return NextResponse.json({
