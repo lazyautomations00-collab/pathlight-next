@@ -10,15 +10,15 @@ interface FooterProps {
 export default function Footer({ onNavigate }: FooterProps) {
     return (
         <footer className="bg-slate-900 border-t border-slate-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-20">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 mb-16">
                     {/* Brand Section */}
                     <div className="md:col-span-4 lg:col-span-5">
                         <div className="flex flex-col items-center md:items-start space-y-6">
                             <div className="text-primary">
-                                <Logo className="w-40 h-40" />
+                                <Logo className="w-32 h-32" />
                             </div>
-                            <p className="text-slate-400 text-center md:text-left text-sm leading-relaxed max-w-sm">
+                            <p className="relative top-[-2rem] text-slate-400 text-center md:text-left text-sm leading-relaxed max-w-sm">
                                 Empowering the next generation with accessible, safe, and intelligent mental health support.
                             </p>
                             <div className="flex items-center gap-5 text-slate-400">
