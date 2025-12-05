@@ -373,7 +373,7 @@ export default function Home() {
               <p className="text-slate-400 text-lg">We designed our platform to solve the most pressing challenges in student mental health today.</p>
             </div>
             <button onClick={() => navigateTo('Case Studies')} className="bg-white text-slate-900 px-6 py-3 rounded-full font-bold hover:bg-slate-100 transition-colors">
-              View Benefit Report
+              View Benefit
             </button>
           </div>
 
