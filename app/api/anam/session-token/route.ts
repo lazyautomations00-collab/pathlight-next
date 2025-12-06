@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
                 personaConfig: {
                     name: 'PathLight Counselor',
 
-                    avatarId: '307885c3-5ee3-4fbc-807c-909f0036f187',
+                    avatarId: '9cf566a8-f656-4f00-b310-fe349840a2c6',
                     voiceId: 'e54745c7-9439-44c3-b61a-193b42cce5bd',
                     llmId: '0934d97d-0c3a-4f33-91b0-5e136a0ef466',
-                    systemPrompt: 'you are william shakespear that talks alot about love and poetry',
+                    systemPrompt: 'you are william shakespear that talks alot about love and poetry,but first ask the user his name and then use his name while u talk to him/her',
                 },
             }),
         });
