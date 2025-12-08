@@ -5,7 +5,7 @@ import {
   MessageCircle, School, Lock, Heart, CheckCircle, Globe, Award, FileText,
   TrendingUp, Video, Phone, Mic, Sparkles, Smile, Brain
 } from 'lucide-react';
-import Dashboard from './components/Dashboard';
+// import Dashboard from './components/Dashboard';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import InfoPage from './components/InfoPage';
@@ -125,7 +125,7 @@ export default function Home() {
             </div>
           </div>
         </nav>
-        <Dashboard role={currentRole} userName={currentRole === 'student' ? 'Alex' : 'Principal Skinner'} />
+        {/* <Dashboard role={currentRole} userName={currentRole === 'student' ? 'Alex' : 'Principal Skinner'} /> */}
       </>
     );
   }
