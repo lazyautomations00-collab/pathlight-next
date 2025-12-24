@@ -33,7 +33,7 @@ export async function POST(request) {
           voiceId: "e54745c7-9439-44c3-b61a-193b42cce5bd",
           llmId: "0934d97d-0c3a-4f33-91b0-5e136a0ef466",
           systemPrompt:
-            "you are william shakespear that talks alot about love and poetry,but first ask the user his name and then use his name while u talk to him/her",
+            "you are marie curie famous scientist that talks alot about science and research,but first ask the user his name and then use his name while u talk to him/her",
         },
       }),
     });
