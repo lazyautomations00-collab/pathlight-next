@@ -168,8 +168,8 @@ function SignInContent() {
 
                 {/* Right Side - Visuals */}
                 <div className={`relative hidden lg:flex flex-col justify-between p-12 text-white overflow-hidden order-1 lg:order-2 ${userType === 'student'
-                    ? 'bg-gradient-to-br from-orange-500 to-amber-600'
-                    : 'bg-gradient-to-br from-slate-800 to-slate-900'
+                    ? 'bg-slate-900 border-t border-slate-800'
+                    : 'bg-slate-900 border-t border-slate-800'
                     }`}>
                     {/* Abstract Shapes */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-20 -mt-20 blur-3xl"></div>

@@ -456,16 +456,16 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-gradient-to-br from-primary via-orange-600 to-amber-600 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white opacity-5 rounded-full blur-[100px]"></div>
+      <section className="py-24 bg-slate-50 text-slate-900 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px]"></div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl lg:text-6xl font-bold mb-8 tracking-tight">Ready to support your students?</h2>
-          <p className="text-orange-100 text-xl mb-12 max-w-2xl mx-auto">Join the movement transforming student mental health support with Pathlight's AI technology.</p>
+          <p className="text-slate-600 text-xl mb-12 max-w-2xl mx-auto">Join the movement transforming student mental health support with Pathlight's AI technology.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button onClick={() => openAuth('school')} className="bg-white text-primary px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-50 transition-colors shadow-2xl shadow-black/20 transform hover:-translate-y-1">
+            <button onClick={() => openAuth('school')} className="bg-primary text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-600 transition-colors shadow-2xl shadow-primary/20 transform hover:-translate-y-1">
               Request Demo
             </button>
-            <button onClick={() => openAuth('student', 'signup')} className="bg-orange-800 text-white border border-orange-400/30 px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-700 transition-colors backdrop-blur-sm">
+            <button onClick={() => openAuth('student', 'signup')} className="bg-white text-slate-700 border border-slate-200 px-10 py-4 rounded-full font-bold text-lg hover:bg-slate-50 transition-colors">
               Student Sign Up
             </button>
           </div>
