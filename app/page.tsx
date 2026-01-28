@@ -19,22 +19,6 @@ import { useRouter } from "next/navigation";
 import { Role } from "@/types";
 const AVATARS = [
   {
-    id: 1,
-    name: "Tom Steyer",
-    role: "The Climate Crusader",
-    image: "/tom_seyer.jpeg",
-    desc: "Focuses on environmental sustainability, economic justice, and democratic engagement.",
-    color: "bg-green-600"
-  },
-  {
-    id: 2,
-    name: "Hilda Solis",
-    role: "The Community Champion",
-    image: "/hilda_solis.jpg",
-    desc: "Focuses on worker's rights, environmental justice, and community empowerment.",
-    color: "bg-blue-600"
-  },
-  {
     id: 3,
     name: "Matthew McConaughey",
     role: "The Visionary Philanthropist",
