@@ -123,7 +123,7 @@ export default function Dashboard() {
                 </header>
 
                 {/* Dashboard Content */}
-                <div className="p-8">
+                <div className="p-4 md:p-8">
                     {!callActive ? (
                         // Pre-call state
                         <div className="max-w-4xl mx-auto">

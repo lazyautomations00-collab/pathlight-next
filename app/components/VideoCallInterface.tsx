@@ -23,8 +23,9 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
     const [sessionId, setSessionId] = useState<string>("");
     const [muted, setMuted] = useState(false);
     const [videoEnabled, setVideoEnabled] = useState(true);
+    const [isChatOpen, setIsChatOpen] = useState(false); // Mobile chat state
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    
+
     // Chat State
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
@@ -74,11 +75,11 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
             }
 
             const data = await response.json();
-            
+
             if (data.conversationUrl) {
                 setConversationUrl(data.conversationUrl);
             }
-            
+
             setSessionId(data.conversationId);
             setConnected(true);
             setConnecting(false);
@@ -163,9 +164,9 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
     };
 
     return (
-        <div className="relative w-full h-full flex flex-col lg:flex-row gap-4 bg-slate-50 rounded-2xl overflow-hidden">
+        <div className="relative w-full h-full flex flex-col lg:flex-row gap-2 lg:gap-4 bg-slate-50 rounded-2xl overflow-hidden">
             {/* Video Section */}
-            <div className="lg:w-2/3 h-[40vh] lg:h-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl overflow-hidden relative">
+            <div className="w-full h-full lg:w-2/3 lg:h-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl overflow-hidden relative shrink-0">
                 {/* Connecting Overlay */}
                 {connecting && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900/95 z-20">
@@ -207,8 +208,8 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             <div className="w-full h-full flex items-center justify-center relative bg-gradient-to-br from-orange-500/20 to-amber-500/20">
                                 <div className="text-center">
                                     <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden ring-4 ring-orange-500 shadow-2xl">
-                                        <img 
-                                            src="/counselor-avatar.jpg" 
+                                        <img
+                                            src="/counselor-avatar.jpg"
                                             alt="AI Career Counselor"
                                             className="w-full h-full object-cover"
                                         />
@@ -224,15 +225,15 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                         )}
 
                         {/* Video Controls Overlay */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10">
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10 w-full justify-center px-4 overflow-x-auto">
+
                             {/* Mute Button */}
                             <button
                                 onClick={toggleMute}
-                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${
-                                    muted
-                                        ? "bg-red-500 hover:bg-red-600"
-                                        : "bg-slate-700/90 hover:bg-slate-600 backdrop-blur-md"
-                                }`}
+                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg flex-shrink-0 ${muted
+                                    ? "bg-red-500 hover:bg-red-600"
+                                    : "bg-slate-700/90 hover:bg-slate-600 backdrop-blur-md"
+                                    }`}
                                 title={muted ? "Unmute" : "Mute"}
                             >
                                 {muted ? (
@@ -245,11 +246,10 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             {/* Video Toggle Button */}
                             <button
                                 onClick={toggleVideo}
-                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${
-                                    !videoEnabled
-                                        ? "bg-red-500 hover:bg-red-600"
-                                        : "bg-slate-700/90 hover:bg-slate-600 backdrop-blur-md"
-                                }`}
+                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg flex-shrink-0 ${!videoEnabled
+                                    ? "bg-red-500 hover:bg-red-600"
+                                    : "bg-slate-700/90 hover:bg-slate-600 backdrop-blur-md"
+                                    }`}
                                 title={videoEnabled ? "Turn off camera" : "Turn on camera"}
                             >
                                 {videoEnabled ? (
@@ -262,7 +262,7 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             {/* End Call Button */}
                             <button
                                 onClick={handleEndCall}
-                                className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all shadow-lg"
+                                className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all shadow-lg flex-shrink-0"
                                 title="End Session"
                             >
                                 <PhoneOff className="w-6 h-6 text-white" />
@@ -271,7 +271,7 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             {/* Notes Button */}
                             <button
                                 onClick={() => setShowNotes(true)}
-                                className="w-14 h-14 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all shadow-lg"
+                                className="w-14 h-14 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all shadow-lg hidden sm:flex flex-shrink-0"
                                 title="Open Notes"
                             >
                                 <Notebook className="w-6 h-6 text-white" />
@@ -279,7 +279,7 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                         </div>
 
                         {/* Status Indicator */}
-                        <div className="absolute top-6 left-6 flex items-center gap-2 bg-slate-900/70 backdrop-blur-md px-4 py-2 rounded-full">
+                        <div className="absolute top-6 left-6 flex items-center gap-2 bg-slate-900/70 backdrop-blur-md px-4 py-2 rounded-full pointer-events-none">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                             <span className="text-white text-sm font-medium">Live Session</span>
                         </div>
@@ -287,15 +287,29 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                 )}
             </div>
 
-            {/* Chat Section */}
-            <div className="lg:w-1/3 h-[60vh] lg:h-full flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-orange-100">
+            {/* Chat Section - Overlay on Mobile, Side-by-side on Desktop */}
+            <div className={`
+                fixed inset-x-0 bottom-0 h-[70vh] z-40 lg:static lg:h-full lg:w-1/3 lg:z-auto
+                transition-transform duration-300 ease-in-out
+                ${isChatOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+                flex flex-col bg-white rounded-t-2xl lg:rounded-2xl shadow-2xl lg:shadow-xl overflow-hidden border-t-2 lg:border-2 border-orange-100
+            `}>
                 {/* Chat Header */}
-                <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-4 flex items-center gap-3">
-                    <MessageCircle className="w-6 h-6" />
-                    <div>
-                        <h3 className="font-bold text-lg">Live Chat</h3>
-                        <p className="text-orange-100 text-xs">Ask questions anytime</p>
+                <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-4 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3">
+                        <MessageCircle className="w-6 h-6" />
+                        <div>
+                            <h3 className="font-bold text-lg">Live Chat</h3>
+                            <p className="text-orange-100 text-xs">Ask questions anytime</p>
+                        </div>
                     </div>
+                    {/* Mobile Close Button */}
+                    <button
+                        onClick={() => setIsChatOpen(false)}
+                        className="lg:hidden p-2 hover:bg-white/20 rounded-full transition-colors"
+                    >
+                        <div className="w-6 h-1 bg-white/50 rounded-full"></div>
+                    </button>
                 </div>
 
                 {/* Messages Area */}
@@ -306,11 +320,10 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                         >
                             <div
-                                className={`max-w-[85%] px-4 py-3 rounded-2xl ${
-                                    message.role === "user"
-                                        ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-br-none shadow-md"
-                                        : "bg-white text-gray-900 rounded-bl-none border-2 border-orange-200 shadow-sm"
-                                }`}
+                                className={`max-w-[85%] px-4 py-3 rounded-2xl ${message.role === "user"
+                                    ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-br-none shadow-md"
+                                    : "bg-white text-gray-900 rounded-bl-none border-2 border-orange-200 shadow-sm"
+                                    }`}
                             >
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                                 <span className={`text-xs mt-2 block ${message.role === "user" ? "opacity-80" : "opacity-60"}`}>
@@ -339,7 +352,7 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t-2 border-orange-100 p-3 bg-white">
+                <div className="border-t-2 border-orange-100 p-3 bg-white shrink-0 pb-safe">
                     <form onSubmit={handleSendMessage} className="flex gap-2">
                         <input
                             type="text"
@@ -348,7 +361,7 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             placeholder="Type your message..."
                             className="flex-1 px-4 py-2.5 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors text-slate-800 text-sm"
                             disabled={loading || !connected}
-                            autoFocus
+                        // autoFocus - Remove autofocus to prevent keyboard from popping up on chat open on mobile
                         />
                         <button
                             type="submit"
@@ -358,11 +371,33 @@ export default function VideoCallInterface({ onEndCall }: VideoCallInterfaceProp
                             <Send size={16} />
                         </button>
                     </form>
-                    <p className="text-xs text-slate-500 mt-2 text-center">
+                    <p className="text-xs text-slate-500 mt-2 text-center lg:hidden">
+                        Swipe down to close chat
+                    </p>
+                    <p className="text-xs text-slate-500 mt-2 text-center hidden lg:block">
                         💡 Chat while watching - I can see and hear you!
                     </p>
                 </div>
             </div>
+
+            {/* Mobile Backdrop for Chat */}
+            {isChatOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                    onClick={() => setIsChatOpen(false)}
+                />
+            )}
+
+            {/* Mobile Chat FAB - Stacked above Notes FAB */}
+            {!isChatOpen && (
+                <button
+                    onClick={() => setIsChatOpen(true)}
+                    className="fixed bottom-28 right-8 w-14 h-14 bg-orange-600 text-white rounded-full shadow-xl hover:bg-orange-700 hover:scale-110 transition-all z-30 lg:hidden flex items-center justify-center animate-in fade-in zoom-in duration-300"
+                    title="Open Chat"
+                >
+                    <MessageCircle size={28} />
+                </button>
+            )}
 
             {/* Notes Sidebar */}
             <NotesSidebar show={showNotes} onClose={() => setShowNotes(false)} />
