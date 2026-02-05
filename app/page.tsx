@@ -73,6 +73,13 @@ export default function Home() {
   };
 
   const openAuth = (type: 'student' | 'school', mode: 'login' | 'signup' = 'login') => {
+    // Check if user is already logged in
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (token) {
+      router.push('/dashboard');
+      return;
+    }
+
     if (mode === 'signup') {
       router.push(`/signup?type=${type}`);
     } else {

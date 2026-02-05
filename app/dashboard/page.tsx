@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Logo } from "../components/Logo";
 import toast from "react-hot-toast";
 import { LogOut, User, Video, Settings, History } from "lucide-react";
@@ -119,7 +120,11 @@ export default function Dashboard() {
             {/* Sidebar */}
             <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 z-20 hidden lg:block">
                 <div className="p-6">
-                    <Logo className="w-32" />
+                    <Link href="/">
+                        <div className="text-primary">
+                            <Logo className="w-32" />
+                        </div>
+                    </Link>
                 </div>
 
                 <nav className="px-4 space-y-2 mt-4">
