@@ -33,14 +33,7 @@ export default function Dashboard() {
             enabled: true,
             description: "Energetic and enthusiastic guidance to help you find your path!"
         },
-        {
-            id: 'hilda',
-            name: 'Hilda Solis',
-            role: 'Community Champion',
-            image: '/hilda_solis.jpg',
-            enabled: false,
-            description: "Focuses on worker's rights, environmental justice, and community empowerment. (Coming Soon)"
-        },
+
         {
             id: 'bill',
             name: 'Bill Gates',
