@@ -14,7 +14,7 @@ import WhatItOffers from './components/WhatItOffers';
 import { Logo } from './components/Logo';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/types";
 const AVATARS = [
@@ -133,6 +133,28 @@ export default function Home() {
         </nav>
         {/* <Dashboard role={currentRole} userName={currentRole === 'student' ? 'Alex' : 'Principal Skinner'} /> */}
       </>
+    );
+  }
+
+  // Check for authentication on mount
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (!token) {
+      router.push('/signin');
+    } else {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
