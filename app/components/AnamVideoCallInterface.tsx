@@ -51,10 +51,14 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
     }, [messages]);
 
     useEffect(() => {
-        startCall();
+        const abortController = new AbortController();
+        startCall(abortController.signal);
 
         return () => {
+            abortController.abort();
             stopCall();
+            // Reset connection state on unmount
+            setConnected(false);
         };
     }, []);
 
@@ -70,7 +74,9 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
         setConnected(false);
     };
 
-    const startCall = async () => {
+    const startCall = async (signalOrEvent?: AbortSignal | React.MouseEvent) => {
+        const signal = signalOrEvent instanceof AbortSignal ? signalOrEvent : undefined;
+
         try {
             setConnecting(true);
             setError(null);
@@ -97,7 +103,8 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
                 },
                 body: JSON.stringify({
                     personaConfig: activePersonaConfig
-                })
+                }),
+                signal
             });
 
             if (!tokenResponse.ok) {
@@ -105,6 +112,9 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
             }
 
             const { sessionToken } = await tokenResponse.json();
+
+            // Check if aborted before continuing (though fetch would normally throw)
+            if (signal?.aborted) return;
 
             // 2. Initialize Anam Client
             const client = createClient(sessionToken, {
@@ -119,15 +129,11 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
             }
 
             // 4. Attach Event Listeners (if applicable type definitions allow)
-            // For now, we assume standard WebRTC connection success means we are connected
             setConnected(true);
             setConnecting(false);
 
             // Initial greeting
-            // client.talk("Hello! I'm your career counselor. How can I help you today?");
-
             const user = JSON.parse(localStorage.getItem("user") || "{}");
-
             let greetingContent = `🎉 Hey ${user.name || 'there'}! I'm your AI Career Counselor. I'm here to help you explore your career path!`;
 
             if (language === 'es') {
@@ -146,10 +152,20 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
             toast.success("Connected to session! 🎥");
 
         } catch (err: any) {
+            // Ignore abort errors
+            if (err.name === 'AbortError') {
+                console.log("Anam call aborted");
+                return;
+            }
+
             console.error("Failed to start Anam call:", err);
-            setError(err.message || "Failed to connect");
-            setConnecting(false);
-            toast.error("Failed to connect to counselor");
+
+            // Do not set error if we are already connected (handling race condition where one succeeds)
+            if (!connected) {
+                setError(err.message || "Failed to connect");
+                setConnecting(false);
+                toast.error("Failed to connect to counselor");
+            }
         }
     };
 
@@ -245,7 +261,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
                 )}
 
                 {/* Error State */}
-                {error && !connecting && (
+                {error && !connecting && !connected && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900/95 z-20">
                         <PhoneOff className="w-16 h-16 text-red-500" />
                         <p className="text-white text-xl font-bold">Connection Failed</p>

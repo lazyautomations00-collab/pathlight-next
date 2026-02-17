@@ -31,7 +31,7 @@ export async function POST(request) {
     // Default configuration (Mathew/Cara)
     const defaultConfig = {
       name: "PathLight Counselor",
-      avatarId: "30fa96d0-26c4-4e55-94a0-517025942e18",
+      avatarId: "edf6fdcb-acab-44b8-b974-ded72665ee26",
       voiceId: "6bfbe25a-979d-40f3-a92b-5394170af54b",
       llmId: "0934d97d-0c3a-4f33-91b0-5e136a0ef466",
       systemPrompt: `

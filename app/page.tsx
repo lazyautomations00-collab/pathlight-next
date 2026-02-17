@@ -24,7 +24,7 @@ const AVATARS = [
     id: 1,
     name: "Mia",
     role: "The empathetic Guide",
-    image: "/mia-placeholder.svg",
+    image: "/mia.jpg",
     desc: "Your personal career counselor, ready to help you discover your path.",
     color: "bg-blue-500"
   },
