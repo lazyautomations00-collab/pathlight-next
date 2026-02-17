@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 
 export default function Dashboard() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const router = useRouter();
     const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
     const [loading, setLoading] = useState(true);
@@ -77,6 +77,12 @@ export default function Dashboard() {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("user");
 
+        // Ensure language is set from local storage if available
+        const storedLang = localStorage.getItem("i18nextLng");
+        if (storedLang && i18n.language !== storedLang) {
+            i18n.changeLanguage(storedLang);
+        }
+
         if (!token || !userData) {
             router.push("/signin");
             return;
@@ -100,13 +106,13 @@ export default function Dashboard() {
 
             localStorage.removeItem("token");
             localStorage.removeItem("user");
-
-            toast.success(t('nav.logout') + " successful"); // Simple fallback or add key
+            localStorage.removeItem("languageSelected"); // Reset language selection on logout
             router.push("/signin");
         } catch (error) {
             console.error('Logout error:', error);
             localStorage.removeItem("token");
             localStorage.removeItem("user");
+            localStorage.removeItem("languageSelected"); // Reset language selection on logout
             router.push("/signin");
         }
     };
@@ -293,6 +299,7 @@ export default function Dashboard() {
                                     voiceId: selectedPersona.voiceId,
                                     systemPrompt: selectedPersona.systemPrompt
                                 } : undefined}
+                                language={i18n.language || 'en'}
                             />
                         </div>
                     )}

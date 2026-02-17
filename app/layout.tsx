@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "AI-Powered Mental Health Support for Students",
 };
 
+import LanguageSelector from "./components/LanguageSelector";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Toaster position="top-center" />
+        <LanguageSelector />
         {children}
       </body>
     </html>

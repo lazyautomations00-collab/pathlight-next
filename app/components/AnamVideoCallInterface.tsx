@@ -16,6 +16,7 @@ interface AnamVideoCallInterfaceProps {
         systemPrompt?: string;
         llmId?: string;
     };
+    language?: string;
 }
 
 interface Message {
@@ -24,7 +25,7 @@ interface Message {
     timestamp: Date;
 }
 
-export default function AnamVideoCallInterface({ onEndCall, personaConfig }: AnamVideoCallInterfaceProps) {
+export default function AnamVideoCallInterface({ onEndCall, personaConfig, language = 'en' }: AnamVideoCallInterfaceProps) {
     const [connecting, setConnecting] = useState(true);
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,19 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig }: Ana
             setError(null);
 
             // 1. Get Session Token
+            // Inject language instruction into system prompt
+            let updatedSystemPrompt = personaConfig?.systemPrompt || "";
+            if (language === 'es') {
+                updatedSystemPrompt += " IMPORTANT: You MUST speak in Spanish (Español).";
+            } else if (language === 'ja') {
+                updatedSystemPrompt += " IMPORTANT: You MUST speak in Japanese (日本語).";
+            }
+
+            const activePersonaConfig = {
+                ...personaConfig,
+                systemPrompt: updatedSystemPrompt
+            };
+
             const tokenResponse = await fetch("/api/anam/session-token", {
                 method: "POST",
                 headers: {
@@ -82,7 +96,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig }: Ana
                     "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
                 },
                 body: JSON.stringify({
-                    personaConfig: personaConfig
+                    personaConfig: activePersonaConfig
                 })
             });
 
@@ -113,9 +127,18 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig }: Ana
             // client.talk("Hello! I'm your career counselor. How can I help you today?");
 
             const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+            let greetingContent = `🎉 Hey ${user.name || 'there'}! I'm your AI Career Counselor. I'm here to help you explore your career path!`;
+
+            if (language === 'es') {
+                greetingContent = `🎉 ¡Hola ${user.name || ''}! Soy tu Consejero de Carrera de IA. ¡Estoy aquí para ayudarte a explorar tu camino profesional!`;
+            } else if (language === 'ja') {
+                greetingContent = `🎉 こんにちは、${user.name || ''}さん！私はあなたのAIキャリアカウンセラーです。あなたのキャリアパスを探るお手伝いをします！`;
+            }
+
             const greeting: Message = {
                 role: "counselor",
-                content: `🎉 Hey ${user.name || 'there'}! I'm your AI Career Counselor. I'm here to help you explore your career path!`,
+                content: greetingContent,
                 timestamp: new Date()
             };
             setMessages([greeting]);
