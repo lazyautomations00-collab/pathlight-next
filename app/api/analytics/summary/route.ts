@@ -28,12 +28,19 @@ export async function GET(req: NextRequest) {
 
         await dbConnect();
 
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get('userId');
+
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+        // Filter for user-specific queries
+        const userFilter = userId ? { userId } : {};
+        const timeAndUserFilter = { createdAt: { $gte: thirtyDaysAgo }, ...userFilter };
+
         // Run all aggregations in parallel
         const [
-            totalUsers,
+            totalUsersCount,
             totalSessions,
             totalPageViews,
             totalSignups,
@@ -41,28 +48,30 @@ export async function GET(req: NextRequest) {
             eventsByDay,
             sessionsByCounselor,
             topEvents,
+            userList,
         ] = await Promise.all([
-            // Total registered users
+            // Total registered users (always global or filtered by ID if provided?)
+            // Usually global summary shows total system users
             User.countDocuments(),
 
             // Total counseling sessions started
-            AnalyticsEvent.countDocuments({ event: 'session_start' }),
+            AnalyticsEvent.countDocuments({ event: 'session_start', ...userFilter }),
 
             // Total page views
-            AnalyticsEvent.countDocuments({ event: 'page_view' }),
+            AnalyticsEvent.countDocuments({ event: 'page_view', ...userFilter }),
 
             // Total signups
-            AnalyticsEvent.countDocuments({ event: 'signup' }),
+            AnalyticsEvent.countDocuments({ event: 'signup', ...userFilter }),
 
             // 20 most recent events
-            AnalyticsEvent.find()
+            AnalyticsEvent.find(userFilter)
                 .sort({ createdAt: -1 })
                 .limit(20)
                 .lean(),
 
             // Events grouped by day (last 30 days)
             AnalyticsEvent.aggregate([
-                { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+                { $match: timeAndUserFilter },
                 {
                     $group: {
                         _id: {
@@ -77,7 +86,7 @@ export async function GET(req: NextRequest) {
 
             // Sessions grouped by counselor name
             AnalyticsEvent.aggregate([
-                { $match: { event: 'session_start' } },
+                { $match: { event: 'session_start', ...userFilter } },
                 {
                     $group: {
                         _id: '$metadata.counselor',
@@ -88,8 +97,9 @@ export async function GET(req: NextRequest) {
                 { $project: { name: { $ifNull: ['$_id', 'Unknown'] }, sessions: 1, _id: 0 } },
             ]),
 
-            // Top 5 event types by count
+            // Top event types by count
             AnalyticsEvent.aggregate([
+                { $match: userFilter },
                 {
                     $group: {
                         _id: '$event',
@@ -100,11 +110,29 @@ export async function GET(req: NextRequest) {
                 { $limit: 8 },
                 { $project: { event: '$_id', count: 1, _id: 0 } },
             ]),
+
+            // User list with stats (only if no specific userId is requested)
+            !userId ? AnalyticsEvent.aggregate([
+                {
+                    $group: {
+                        _id: '$userId',
+                        email: { $first: '$userEmail' },
+                        totalEvents: { $sum: 1 },
+                        lastActive: { $max: '$createdAt' },
+                        sessions: {
+                            $sum: { $cond: [{ $eq: ['$event', 'session_start'] }, 1, 0] }
+                        }
+                    }
+                },
+                { $match: { _id: { $ne: null } } },
+                { $sort: { lastActive: -1 } },
+                { $limit: 100 }
+            ]) : Promise.resolve([]),
         ]);
 
         return NextResponse.json({
             summary: {
-                totalUsers,
+                totalUsers: totalUsersCount,
                 totalSessions,
                 totalPageViews,
                 totalSignups,
@@ -113,6 +141,9 @@ export async function GET(req: NextRequest) {
             eventsByDay,
             sessionsByCounselor,
             topEvents,
+            userList: userList || [],
+            isFiltered: !!userId,
+            filterUserId: userId
         });
     } catch (error) {
         console.error('[analytics/summary] error:', error);

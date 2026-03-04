@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import {
     Users, Video, Eye, UserPlus, BarChart2, TrendingUp,
-    LogOut, Activity, Clock, Zap
+    LogOut, Activity, Clock, Zap, ChevronRight, Search, ArrowLeft
 } from "lucide-react";
 
 interface Summary {
@@ -27,12 +27,22 @@ interface AnalyticsData {
         _id: string;
         event: string;
         userEmail: string | null;
+        userId: string | null;
         metadata: Record<string, unknown>;
         createdAt: string;
     }>;
     eventsByDay: Array<{ date: string; count: number }>;
     sessionsByCounselor: Array<{ name: string; sessions: number }>;
     topEvents: Array<{ event: string; count: number }>;
+    userList: Array<{
+        _id: string;
+        email: string;
+        totalEvents: number;
+        lastActive: string;
+        sessions: number;
+    }>;
+    isFiltered: boolean;
+    filterUserId: string | null;
 }
 
 const EVENT_COLORS: Record<string, string> = {
@@ -77,6 +87,9 @@ export default function AnalyticsPage() {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -100,10 +113,14 @@ export default function AnalyticsPage() {
         }
     }, [router]);
 
-    const fetchAnalytics = async (token: string) => {
+    const fetchAnalytics = async (token: string, userId?: string | null) => {
         try {
             setLoading(true);
-            const res = await fetch("/api/analytics/summary", {
+            const url = userId
+                ? `/api/analytics/summary?userId=${userId}`
+                : "/api/analytics/summary";
+
+            const res = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -122,6 +139,23 @@ export default function AnalyticsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSelectUser = (userId: string, email: string) => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        setSelectedUserId(userId);
+        setSelectedUserEmail(email);
+        fetchAnalytics(token, userId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleBackToGlobal = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        setSelectedUserId(null);
+        setSelectedUserEmail(null);
+        fetchAnalytics(token, null);
     };
 
     const handleLogout = () => {
@@ -159,7 +193,8 @@ export default function AnalyticsPage() {
         );
     }
 
-    const { summary, recentEvents, eventsByDay, sessionsByCounselor, topEvents } = data!;
+    if (!data) return null;
+    const { summary, recentEvents, eventsByDay, sessionsByCounselor, topEvents, userList, isFiltered } = data;
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -204,20 +239,35 @@ export default function AnalyticsPage() {
                             <BarChart2 size={22} className="text-orange-500" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900">Analytics</h1>
-                            <p className="text-xs text-slate-400">Real-time user activity</p>
+                            <h1 className="text-xl font-bold text-slate-900">
+                                {selectedUserEmail ? `Analytics: ${selectedUserEmail}` : "Platform Analytics"}
+                            </h1>
+                            <p className="text-xs text-slate-400">
+                                {selectedUserEmail ? "Individual user activity" : "Real-time system activity"}
+                            </p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => {
-                            const token = localStorage.getItem("token");
-                            if (token) fetchAnalytics(token);
-                        }}
-                        className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-orange-600 bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 px-4 py-2 rounded-xl transition-all"
-                    >
-                        <Zap size={15} />
-                        Refresh
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {data?.isFiltered && (
+                            <button
+                                onClick={handleBackToGlobal}
+                                className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 py-2 rounded-xl transition-all shadow-sm"
+                            >
+                                <ArrowLeft size={15} />
+                                Back to Global
+                            </button>
+                        )}
+                        <button
+                            onClick={() => {
+                                const token = localStorage.getItem("token");
+                                if (token) fetchAnalytics(token, selectedUserId);
+                            }}
+                            className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-orange-600 bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 px-4 py-2 rounded-xl transition-all"
+                        >
+                            <Zap size={15} />
+                            Refresh
+                        </button>
+                    </div>
                 </header>
 
                 <div className="p-4 md:p-8 space-y-8">
@@ -225,10 +275,15 @@ export default function AnalyticsPage() {
                     <section>
                         <h2 className="text-lg font-bold text-slate-800 mb-4">Overview</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-                            <StatCard icon={Users} label="Total Users" value={summary.totalUsers} color="bg-blue-500" />
+                            <StatCard
+                                icon={isFiltered ? Activity : Users}
+                                label={isFiltered ? "User Events" : "Total Users"}
+                                value={isFiltered ? recentEvents.length : summary.totalUsers}
+                                color="bg-blue-500"
+                            />
                             <StatCard icon={Video} label="Counseling Sessions" value={summary.totalSessions} color="bg-orange-500" />
                             <StatCard icon={Eye} label="Page Views" value={summary.totalPageViews} color="bg-purple-500" />
-                            <StatCard icon={UserPlus} label="Signups" value={summary.totalSignups} color="bg-green-500" />
+                            <StatCard icon={UserPlus} label={isFiltered ? "Active Days" : "Signups"} value={isFiltered ? eventsByDay.length : summary.totalSignups} color="bg-green-500" />
                         </div>
                     </section>
 
@@ -412,6 +467,89 @@ export default function AnalyticsPage() {
                             )}
                         </div>
                     </section>
+
+                    {/* Users List (Only in global view) */}
+                    {!isFiltered && (
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3 className="text-base font-bold text-slate-900">Platform Users</h3>
+                                    <p className="text-xs text-slate-400 mt-0.5">Manage and view individual user activity</p>
+                                </div>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by email..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 w-full md:w-64 transition-all"
+                                    />
+                                </div>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-slate-50/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                            <th className="text-left py-4 px-6">User Email</th>
+                                            <th className="text-center py-4 px-6">Total Events</th>
+                                            <th className="text-center py-4 px-6">Sessions</th>
+                                            <th className="text-left py-4 px-6">Last Active</th>
+                                            <th className="text-right py-4 px-6">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {userList
+                                            .filter(u => u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                            .map((user) => (
+                                                <tr key={user._id} className="hover:bg-slate-50/80 transition-colors">
+                                                    <td className="py-4 px-6">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
+                                                                {user.email?.[0].toUpperCase()}
+                                                            </div>
+                                                            <span className="font-medium text-slate-700">{user.email || 'Anonymous'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-4 px-6 text-center text-slate-500 font-medium">
+                                                        {user.totalEvents.toLocaleString()}
+                                                    </td>
+                                                    <td className="py-4 px-6 text-center">
+                                                        <span className="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 font-bold text-xs">
+                                                            {user.sessions}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 px-6 text-slate-400 text-xs">
+                                                        {new Date(user.lastActive).toLocaleString([], {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                    </td>
+                                                    <td className="py-4 px-6 text-right">
+                                                        <button
+                                                            onClick={() => handleSelectUser(user._id, user.email)}
+                                                            className="inline-flex items-center gap-1.5 text-orange-600 hover:text-orange-700 font-bold text-xs transition-colors"
+                                                        >
+                                                            View Analytics
+                                                            <ChevronRight size={14} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        {userList.length === 0 && (
+                                            <tr>
+                                                <td colSpan={5} className="py-12 text-center text-slate-400 text-sm italic">
+                                                    No users found in analytics data.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    )}
                 </div>
             </main>
         </div>
