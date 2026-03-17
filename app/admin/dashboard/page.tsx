@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import {
     Users, Video, Eye, UserPlus, BarChart2, TrendingUp,
-    LogOut, Activity, Clock, Zap, ChevronRight, Search, ArrowLeft
+    LogOut, Activity, Clock, Zap, ChevronRight, Search, ArrowLeft, MessageCircle
 } from "lucide-react";
 
 interface Summary {
@@ -213,9 +213,13 @@ export default function AnalyticsPage() {
                         <Video size={20} />
                         User Dashboard
                     </Link>
-                    <Link href="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-600 rounded-xl font-medium">
+                    <Link href="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-600 rounded-xl font-medium transition-colors">
                         <BarChart2 size={20} />
                         Admin Analytics
+                    </Link>
+                    <Link href="/admin/transcripts" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl font-medium transition-colors">
+                        <MessageCircle size={20} />
+                        Transcripts
                     </Link>
                 </nav>
 

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Video, VideoOff, Mic, MicOff, PhoneOff, Loader2, Notebook, Send, MessageCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
 import NotesSidebar from "./NotesSidebar";
-import { createClient, AnamClient } from "@anam-ai/js-sdk";
+import { createClient, AnamClient, AnamEvent } from "@anam-ai/js-sdk";
 import { PersonaConfig } from "@anam-ai/js-sdk/dist/module/types";
 
 interface AnamVideoCallInterfaceProps {
@@ -39,6 +39,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
     // Chat State
     const [messages, setMessages] = useState<Message[]>([]);
+    const messagesRef = useRef<Message[]>([]); // Ref to hold latest messages for unmount/end call
     const [inputValue, setInputValue] = useState("");
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,11 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    // Keep messagesRef updated so stopCall has latest state
+    useEffect(() => {
+        messagesRef.current = messages;
     }, [messages]);
 
     useEffect(() => {
@@ -65,6 +71,22 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
     const stopCall = async () => {
         if (anamClientRef.current) {
             try {
+                // Save transcript before stopping
+                if (messagesRef.current.length > 0) {
+                    await fetch("/api/anam/transcript", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+                        },
+                        body: JSON.stringify({
+                            sessionId: (anamClientRef.current as any).sessionId || "unknown",
+                            personaId: personaConfig?.personaId || "unknown",
+                            messages: messagesRef.current
+                        })
+                    }).catch(err => console.error("Failed to save transcript:", err));
+                }
+
                 await anamClientRef.current.stopStreaming();
             } catch (error) {
                 console.error("Error stopping stream:", error);
@@ -148,6 +170,18 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
                 timestamp: new Date()
             };
             setMessages([greeting]);
+
+            // Add event listener for message history
+            client.addListener(AnamEvent.MESSAGE_HISTORY_UPDATED, (history: any[]) => {
+                // history is array of messages from Anam
+                const formattedMessages: Message[] = history.map(msg => ({
+                    role: msg.role === 'persona' ? 'counselor' : 'user',
+                    content: msg.content,
+                    timestamp: new Date()
+                }));
+                // Prepend our custom greeting to the history
+                setMessages([greeting, ...formattedMessages]);
+            });
 
             toast.success("Connected to session! 🎥");
 
