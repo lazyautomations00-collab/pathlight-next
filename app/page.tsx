@@ -178,47 +178,45 @@ export default function Home() {
       <Navbar onNavigate={navigateTo} onAuth={openAuth} />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden relative">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl opacity-50"></div>
+      <section className="pt-28 pb-14 lg:pt-36 lg:pb-8 overflow-hidden relative bg-white">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8 z-10">
-              <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-full px-4 py-1.5 shadow-sm">
-                <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.86fr] gap-12 items-center">
+            <div className="space-y-6 z-10">
+              <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-full px-4 py-1.5">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
                 <span className="text-xs font-bold text-orange-700 tracking-wide uppercase">{t('home.hero.new_support')}</span>
               </div>
-              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="max-w-3xl text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-950 leading-[1.03]">
                 {t('home.hero.title_prefix')} <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{t('home.hero.title_suffix')}</span>
+                <span className="block text-primary uppercase">{t('home.hero.title_suffix')}</span>
               </h1>
-              <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
+              <p className="text-base text-slate-500 leading-relaxed max-w-xl">
                 {t('home.hero.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button onClick={() => openAuth('student', 'signup')} className="bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-600 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 group">
+                <button onClick={() => openAuth('student', 'signup')} className="bg-primary text-white px-7 py-3 rounded-full font-bold text-sm hover:bg-orange-600 transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 group">
                   {t('home.hero.try_free')} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button onClick={() => navigateTo('#features')} className="bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-50 transition-colors flex items-center justify-center hover:border-orange-300">
+                <button onClick={() => navigateTo('#features')} className="bg-white text-slate-700 border border-slate-200 px-7 py-3 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors flex items-center justify-center hover:border-orange-300">
                   {t('home.hero.see_features')}
                 </button>
               </div>
 
 
-              <div className="pt-6">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t('home.hero.select_preview')}</p>
+              <div className="pt-4">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">{t('home.hero.select_preview')}</p>
                 <div className="flex gap-3">
                   {AVATARS.map((avatar) => (
                     <button
                       key={avatar.id}
                       onClick={() => setActiveAvatar(avatar)}
-                      className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-all ${activeAvatar.id === avatar.id ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-white opacity-70 hover:opacity-100 hover:scale-105'}`}
+                      className={`relative w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${activeAvatar.id === avatar.id ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-white opacity-70 hover:opacity-100 hover:scale-105'}`}
                     >
                       <img src={avatar.image} alt={avatar.name} className="w-full h-full object-cover" />
                     </button>
                   ))}
-                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs font-medium">
+                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-[11px] font-medium">
                     +More
                   </div>
                 </div>
@@ -227,7 +225,7 @@ export default function Home() {
 
 
             <div className="relative z-10 flex justify-center lg:justify-end">
-              <div className="relative w-80 sm:w-96 aspect-[9/16] bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden border-8 border-slate-900 ring-1 ring-slate-900/10 transition-all duration-500">
+              <div className="relative w-72 sm:w-80 aspect-[9/16] bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border-8 border-slate-900 ring-1 ring-slate-900/10 transition-all duration-500">
 
                 <div className="absolute inset-0">
                   <img
@@ -250,7 +248,7 @@ export default function Home() {
                         <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary"></div>
                       </div>
                       <div className="px-3 py-1.5 bg-slate-900/90 backdrop-blur-md flex items-center border-l border-white/5">
-                        <span className="text-sm font-bold text-white tracking-wide">AI ICON</span>
+                        <span className="text-sm font-bold text-white tracking-wide">{t('home.hero.ai_icon')}</span>
                       </div>
                     </div>
                   </div>
@@ -283,22 +281,20 @@ export default function Home() {
             </div>
 
 
-            <div className={`absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-400/20 rounded-full blur-3xl animate-pulse transition-colors duration-500`}></div>
           </div>
         </div>
       </section>
 
-      {/* Trust Strip */}
-      <section className="py-10 border-y border-orange-100 bg-orange-50/50">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-slate-400 font-medium mb-8 text-sm uppercase tracking-widest">{t('home.trust.joining_forces')}</p>
-          <div className="flex flex-wrap justify-center gap-12 lg:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            {['Riverside High', 'Oakwood Academy', 'Tech Institute', 'Global Prep', 'Future Learning'].map(school => (
-              <span key={school} className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <School size={24} className="text-slate-400" /> {school}
-              </span>
-            ))}
-          </div>
+      {/* Intro Copy */}
+      <section className="py-14 border-t border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="max-w-5xl text-3xl lg:text-4xl font-bold leading-snug tracking-tight text-slate-950">
+            Your AI Career Counselor<br />
+            <span className="font-medium">for </span>College, Life<span className="font-medium">, and </span>What Comes Next
+          </h2>
+          <p className="mt-2 max-w-6xl text-2xl leading-snug text-slate-950">
+            Experience the future of career and academic support. Choose a counselor that resonates with you and get real-time, judgment-free guidance for school, stress, and life
+          </p>
         </div>
       </section>
 

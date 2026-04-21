@@ -22,13 +22,13 @@
         "hero": {
             "new_support": "New: Live 24/7 Support",
             "title_prefix": "The World's First",
-            "title_suffix": "AI Career ICON.",
-            "description": "Experience the future of mental health and career support. Choose an ICON that resonates with you and get real-time, judgment-free support for school, stress, and life.",
+            "title_suffix": "AI Career COUNSELOR.",
+            "description": "Experience the future of mental health and career support. Choose a COUNSELOR that resonates with you and get real-time, judgment-free support for school, stress, and life.",
             "try_free": "Try It Free",
             "see_features": "See Features",
-            "select_preview": "Select your ICON to preview",
+            "select_preview": "Select your counselor to preview",
             "tap_to_chat": "Tap call button to start chat",
-            "ai_icon": "AI ICON"
+            "ai_icon": "AI COUNSELORS"
         },
         "trust": {
             "joining_forces": "Joining forces with innovative schools"
