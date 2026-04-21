@@ -119,8 +119,8 @@ export default function GuidesPage() {
                             <ArrowLeft size={24} />
                         </button>
                         <div>
-                            <h1 className="text-4xl font-bold text-slate-900">Our AI ICONS</h1>
-                            <p className="text-slate-600">Choose the perfect mentor for your journey.</p>
+                            <h1 className="text-4xl font-bold text-slate-900">Meet Your Counselors</h1>
+                            <p className="text-slate-600">Mental health isn’t one-size-fits-all. Our platform offers a range of AI personalities modeled after real counseling styles.</p>
                         </div>
                     </div>
 
@@ -201,8 +201,8 @@ export default function GuidesPage() {
                                 </div>
 
                                 <div className="mt-8 p-6 bg-orange-50 rounded-3xl border border-orange-100">
-                                    <h4 className="font-bold text-slate-900 mb-2">About {activeAvatar.name}</h4>
-                                    <p className="text-slate-600 text-sm leading-relaxed">{activeAvatar.desc}</p>
+                                    <h4 className="font-bold text-slate-900 mb-2">Meet The Pathlight AI Counselors Who Get You</h4>
+                                    <p className="text-slate-600 text-sm leading-relaxed">Guidance isn’t one-size-fits-all. Our platform offers Pathlight personalities inspired by real counseling styles — from the Coach and the Scholar to the Visionary, the Entrepreneur, and more.</p>
                                 </div>
                             </div>
                         </div>
