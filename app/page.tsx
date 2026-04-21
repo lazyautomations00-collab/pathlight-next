@@ -188,8 +188,7 @@ export default function Home() {
                 <span className="text-xs font-bold text-orange-700 tracking-wide uppercase">{t('home.hero.new_support')}</span>
               </div>
               <h1 className="max-w-3xl text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-950 leading-[1.03]">
-                {t('home.hero.title_prefix')} <br />
-                <span className="block text-primary">{t('home.hero.title_suffix')}</span>
+                {t('home.hero.title_prefix')}
               </h1>
               <p className="text-base text-slate-500 leading-relaxed max-w-xl">
                 {t('home.hero.description')}
