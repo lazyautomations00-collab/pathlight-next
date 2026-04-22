@@ -262,12 +262,8 @@ export default function Home() {
 
                 </div>
 
-                <div className="text-center space-y-6">
-                  <div className="space-y-1">
-                    <h3 className="text-white text-2xl font-bold">{activeAvatar.name}</h3>
-                    <p className="text-white/70 text-sm">{activeAvatar.role}</p>
-                  </div>
-
+                <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center space-y-4">
+                  <p className="text-white/70 text-sm font-medium">{activeAvatar.role}</p>
                   <div className="flex items-center justify-center gap-6">
                     <button className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors">
                       <Mic size={20} />
