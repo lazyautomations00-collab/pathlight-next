@@ -22,27 +22,43 @@ import { Role } from "@/types";
 const AVATARS = [
   {
     id: 1,
-    name: "Emily",
-    role: "The empathetic Guide",
-    image: "/emily.png",
+    name: "Richard",
+    role: "The Empathetic Guide",
+    image: "https://framerusercontent.com/images/BfxuDPCmM2NvopgMjexkKFqMgWc.webp",
     desc: "Your personal career counselor, ready to help you discover your path.",
     color: "bg-blue-500"
   },
   {
-    id: 4,
-    name: "Mia",
+    id: 2,
+    name: "Liv",
     role: "The Support Specialist",
-    image: "/mia.png",
+    image: "https://framerusercontent.com/images/iSN4tzOGZv3SA1JxsPxwaXrL5l0.webp",
     desc: "Focuses on providing exceptional support and ensuring your satisfaction every step of the way.",
     color: "bg-orange-500"
   },
   {
-    id: 5,
-    name: "Alex",
+    id: 3,
+    name: "Gabriel",
     role: "The Career Navigator",
-    image: "/counselor-avatar.jpg",
+    image: "https://framerusercontent.com/images/2joxVt7gAQwLX6k5yHxyQAVQ4k.webp",
     desc: "Focuses on long-term career planning, goal setting, and helping you find the right professional path.",
     color: "bg-orange-600"
+  },
+  {
+    id: 4,
+    name: "Mia",
+    role: "The Wellness Coach",
+    image: "https://framerusercontent.com/images/VbGAbBrrMidu4Y5YUJLd4PFJut0.webp",
+    desc: "Focuses on mental well-being, stress management, and building healthy habits for long-term success.",
+    color: "bg-pink-500"
+  },
+  {
+    id: 5,
+    name: "Anne",
+    role: "The Academic Advisor",
+    image: "https://framerusercontent.com/images/ZUmV5HVOgmnwp528GomIq6TMkA.webp",
+    desc: "Specializes in academic planning, study strategies, and helping students achieve their educational goals.",
+    color: "bg-purple-500"
   }
 ];
 export default function Home() {
