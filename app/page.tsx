@@ -50,22 +50,6 @@ const AVATARS = [
     desc: "Focuses on long-term career planning, goal setting, and helping you find the right professional path.",
     color: "bg-orange-600"
   },
-  {
-    id: 4,
-    name: "Mia",
-    role: "The Wellness Coach",
-    image: "https://framerusercontent.com/images/VbGAbBrrMidu4Y5YUJLd4PFJut0.webp",
-    desc: "Focuses on mental well-being, stress management, and building healthy habits for long-term success.",
-    color: "bg-pink-500"
-  },
-  {
-    id: 5,
-    name: "Anne",
-    role: "The Academic Advisor",
-    image: "https://framerusercontent.com/images/ZUmV5HVOgmnwp528GomIq6TMkA.webp",
-    desc: "Specializes in academic planning, study strategies, and helping students achieve their educational goals.",
-    color: "bg-purple-500"
-  }
 ];
 export default function Home() {
 
