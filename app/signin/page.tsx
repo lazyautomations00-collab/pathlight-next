@@ -32,7 +32,7 @@ function SignInContent() {
         if (email.trim().toLowerCase() === 'chapman@pathlightedu.org' && password.trim() === 'chapman009@') {
             localStorage.setItem('user', JSON.stringify({ id: 'demo-chapman', name: 'Chapman', email: 'chapman@pathlightedu.org', role: 'student' }));
             toast.success("Successfully signed in!");
-            router.push('/');
+            router.push('/dashboard');
             setLoading(false);
             return;
         }
