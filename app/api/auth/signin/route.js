@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
@@ -14,6 +13,26 @@ export async function POST(request) {
         if (emailLower === 'usc@gmail.com' && !firebaseUid) {
             // ... original hardcoded logic could stay here if needed for testing
             // But we prefer Firebase now.
+        }
+
+        if (emailLower === 'chapman@pathlightedu.org' && !firebaseUid) {
+            const demoUser = {
+                id: 'demo-chapman',
+                name: 'Chapman',
+                email: 'chapman@pathlightedu.org',
+                role: 'student'
+            };
+
+            const token = jwt.sign(
+                { user: demoUser },
+                process.env.JWT_SECRET || 'your-secret-key',
+                { expiresIn: '7d' }
+            );
+
+            return NextResponse.json({
+                user: demoUser,
+                token
+            });
         }
 
         await dbConnect();
@@ -38,13 +57,22 @@ export async function POST(request) {
             await user.save();
         }
 
+        const userPayload = {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
+
+        const token = jwt.sign(
+            { user: userPayload },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '7d' }
+        );
+
         return NextResponse.json({
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            user: userPayload,
+            token
         });
 
     } catch (error) {

@@ -1,11 +1,9 @@
 "use client";
-import Image from "next/image";
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import {
-  Menu, X, Shield, Users, ArrowRight, Activity,
-  MessageCircle, School, Lock, Heart, CheckCircle, Globe, Award, FileText,
-  TrendingUp, Video, Phone, Mic, Sparkles, Smile, Brain
+  Shield, Users, ArrowRight, Activity, MessageCircle, School, Lock,
+  Heart, CheckCircle, TrendingUp, Video, Phone, Mic, Brain
 } from 'lucide-react';
 // import Dashboard from './components/Dashboard';
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -16,7 +14,7 @@ import WhatItOffers from './components/WhatItOffers';
 import { Logo } from './components/Logo';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/types";
 const AVATARS = [
@@ -72,18 +70,14 @@ const AVATARS = [
 export default function Home() {
 
   const [currentRole, setCurrentRole] = useState<Role | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   // Navigation State
   const [activePage, setActivePage] = useState<string>('home');
 
   // Interactive Hero State
   const [activeAvatar, setActiveAvatar] = useState(AVATARS[0]);
-
-  const handleLogin = (role: 'student' | 'school') => {
-    setCurrentRole(role);
-  };
 
   const handleLogout = () => {
     setCurrentRole(null);
@@ -151,33 +145,6 @@ export default function Home() {
         </nav>
         {/* <Dashboard role={currentRole} userName={currentRole === 'student' ? 'Alex' : 'Principal Skinner'} /> */}
       </>
-    );
-  }
-
-  // Check for authentication on mount
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // i18n
-  // import { useTranslation } from 'react-i18next'; // Need to add import at top
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    if (!token) {
-      // router.push('/signin'); // Removed auto-redirect for landing page
-    } else {
-      setIsAuthenticated(true);
-      // setIsLoading(false); // Removed
-    }
-    setIsLoading(false);
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
     );
   }
 

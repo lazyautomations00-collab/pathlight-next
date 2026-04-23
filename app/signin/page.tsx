@@ -28,16 +28,33 @@ function SignInContent() {
         setError("");
         setLoading(true);
 
-        // Hardcoded demo user bypass
-        if (email.trim().toLowerCase() === 'chapman@pathlightedu.org' && password.trim() === 'chapman009@') {
-            localStorage.setItem('user', JSON.stringify({ id: 'demo-chapman', name: 'Chapman', email: 'chapman@pathlightedu.org', role: 'student' }));
-            toast.success("Successfully signed in!");
-            router.push('/dashboard');
-            setLoading(false);
-            return;
-        }
-
         try {
+            // Hardcoded demo user via backend-issued session token
+            if (email.trim().toLowerCase() === 'chapman@pathlightedu.org' && password.trim() === 'chapman009@') {
+                const res = await fetch('/api/auth/signin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email.trim(),
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Something went wrong while signing in');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                trackEvent('signin', { role: data.user?.role || userType, method: 'demo' });
+                toast.success("Successfully signed in!");
+                router.push('/dashboard');
+                return;
+            }
+
             const { auth } = await import('@/lib/firebase');
             const { signInWithEmailAndPassword, signOut } = await import('firebase/auth');
 
@@ -70,18 +87,19 @@ function SignInContent() {
             }
 
             // Store info
+            localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
 
             trackEvent('signin', { role: data.user?.role || userType });
             toast.success("Successfully signed in!");
 
-            // Redirect to home page
-            router.push('/');
+            router.push('/dashboard');
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Signin error:', err);
-            setError(err.message);
-            toast.error(err.message);
+            const message = err instanceof Error ? err.message : 'Something went wrong while signing in';
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
