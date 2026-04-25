@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Video, VideoOff, Mic, MicOff, PhoneOff, Loader2, Notebook, Send, MessageCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
 import NotesSidebar from "./NotesSidebar";
-import { createClient, AnamClient, AnamEvent } from "@anam-ai/js-sdk";
-import { PersonaConfig } from "@anam-ai/js-sdk/dist/module/types";
+import { createClient, AnamClient } from "@anam-ai/js-sdk";
 
 interface AnamVideoCallInterfaceProps {
     onEndCall: () => void;
@@ -25,10 +24,18 @@ interface Message {
     timestamp: Date;
 }
 
+type ConnectionClosedReason =
+    | "CONNECTION_CLOSED_CODE_NORMAL"
+    | "CONNECTION_CLOSED_CODE_MICROPHONE_PERMISSION_DENIED"
+    | "CONNECTION_CLOSED_CODE_SIGNALLING_CLIENT_CONNECTION_FAILURE"
+    | "CONNECTION_CLOSED_CODE_WEBRTC_FAILURE"
+    | "CONNECTION_CLOSED_CODE_SERVER_CLOSED_CONNECTION";
+
 export default function AnamVideoCallInterface({ onEndCall, personaConfig, language = 'en' }: AnamVideoCallInterfaceProps) {
     const [connecting, setConnecting] = useState(true);
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [connectionStatus, setConnectionStatus] = useState("Requesting live avatar session...");
     const [muted, setMuted] = useState(false);
     const [videoEnabled, setVideoEnabled] = useState(true);
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -36,6 +43,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
     // Anam State
     const videoRef = useRef<HTMLVideoElement>(null);
     const anamClientRef = useRef<AnamClient | null>(null);
+    const videoStartTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Chat State
     const [messages, setMessages] = useState<Message[]>([]);
@@ -46,6 +54,28 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
     // Notes State
     const [showNotes, setShowNotes] = useState(false);
+
+    const formatConnectionError = (reason?: string, details?: string) => {
+        switch (reason) {
+            case "CONNECTION_CLOSED_CODE_MICROPHONE_PERMISSION_DENIED":
+                return "Microphone access was denied. Allow microphone permission and try again.";
+            case "CONNECTION_CLOSED_CODE_WEBRTC_FAILURE":
+                return details || "The live avatar connection failed to start. Try again in Chrome or Edge.";
+            case "CONNECTION_CLOSED_CODE_SERVER_CLOSED_CONNECTION":
+                return details || "The live avatar session was closed by the server.";
+            case "CONNECTION_CLOSED_CODE_SIGNALLING_CLIENT_CONNECTION_FAILURE":
+                return "The live avatar signalling connection failed. Please try again.";
+            default:
+                return details || "Failed to connect to the live avatar.";
+        }
+    };
+
+    const clearVideoStartTimeout = () => {
+        if (videoStartTimeoutRef.current) {
+            clearTimeout(videoStartTimeoutRef.current);
+            videoStartTimeoutRef.current = null;
+        }
+    };
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,15 +92,19 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
         return () => {
             abortController.abort();
+            clearVideoStartTimeout();
             stopCall();
             // Reset connection state on unmount
             setConnected(false);
         };
+        // startCall/stopCall close over the current persona config and are intentionally run once per mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const stopCall = async () => {
         if (anamClientRef.current) {
             try {
+                clearVideoStartTimeout();
                 // Save transcript before stopping
                 if (messagesRef.current.length > 0) {
                     await fetch("/api/anam/transcript", {
@@ -80,7 +114,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
                             "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
                         },
                         body: JSON.stringify({
-                            sessionId: (anamClientRef.current as any).sessionId || "unknown",
+                            sessionId: (anamClientRef.current as AnamClient & { sessionId?: string }).sessionId || "unknown",
                             personaId: personaConfig?.personaId || "unknown",
                             messages: messagesRef.current
                         })
@@ -102,6 +136,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
         try {
             setConnecting(true);
             setError(null);
+            setConnectionStatus("Requesting live avatar session...");
 
             // 1. Get Session Token
             // Inject language instruction into system prompt
@@ -134,6 +169,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
             }
 
             const { sessionToken } = await tokenResponse.json();
+            setConnectionStatus("Live avatar session created. Starting stream...");
 
             // Check if aborted before continuing (though fetch would normally throw)
             if (signal?.aborted) return;
@@ -145,14 +181,57 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
             anamClientRef.current = client;
 
+            client.addListener("CONNECTION_ESTABLISHED", () => {
+                setConnected(true);
+                setConnectionStatus("Connection established. Waiting for avatar video...");
+            });
+
+            client.addListener("VIDEO_PLAY_STARTED", () => {
+                clearVideoStartTimeout();
+                setConnecting(false);
+                setConnected(true);
+                setError(null);
+                setConnectionStatus("Avatar connected.");
+            });
+
+            client.addListener("CONNECTION_CLOSED", (reason: ConnectionClosedReason, details?: string) => {
+                clearVideoStartTimeout();
+                console.error("Anam connection closed:", reason, details);
+                setConnected(false);
+                setConnecting(false);
+                setError(formatConnectionError(reason, details));
+            });
+
+            client.addListener("SERVER_WARNING", (warning: string) => {
+                console.warn("Anam warning:", warning);
+                setConnectionStatus(`Server warning: ${warning}`);
+            });
+
+            client.addListener("MIC_PERMISSION_DENIED", (details?: string) => {
+                clearVideoStartTimeout();
+                setConnected(false);
+                setConnecting(false);
+                setError(formatConnectionError("CONNECTION_CLOSED_CODE_MICROPHONE_PERMISSION_DENIED", details));
+            });
+
+            client.addListener("MIC_PERMISSION_PENDING", () => {
+                setConnectionStatus("Waiting for microphone permission in your browser...");
+            });
+
+            client.addListener("MIC_PERMISSION_GRANTED", () => {
+                setConnectionStatus("Microphone granted. Connecting live avatar...");
+            });
+
             // 3. Start Streaming
             if (videoRef.current) {
+                setConnectionStatus("Opening live avatar stream...");
                 await client.streamToVideoElement("anam-video-element");
+                clearVideoStartTimeout();
+                videoStartTimeoutRef.current = setTimeout(() => {
+                    setConnecting(false);
+                    setError("The live avatar session started, but no video appeared. This is usually a browser microphone/WebRTC/autoplay issue. Try Chrome or Edge, allow microphone access, and reload.");
+                }, 15000);
             }
-
-            // 4. Attach Event Listeners (if applicable type definitions allow)
-            setConnected(true);
-            setConnecting(false);
 
             // Initial greeting
             const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -172,7 +251,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
             setMessages([greeting]);
 
             // Add event listener for message history
-            client.addListener(AnamEvent.MESSAGE_HISTORY_UPDATED, (history: any[]) => {
+            client.addListener("MESSAGE_HISTORY_UPDATED", (history: Array<{ role: string; content: string }>) => {
                 // history is array of messages from Anam
                 const formattedMessages: Message[] = history.map(msg => ({
                     role: msg.role === 'persona' ? 'counselor' : 'user',
@@ -185,9 +264,9 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
             toast.success("Connected to session! 🎥");
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Ignore abort errors
-            if (err.name === 'AbortError') {
+            if (err instanceof Error && err.name === 'AbortError') {
                 // console.log("Anam call aborted");
                 return;
             }
@@ -196,7 +275,9 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
 
             // Do not set error if we are already connected (handling race condition where one succeeds)
             if (!connected) {
-                setError(err.message || "Failed to connect");
+                clearVideoStartTimeout();
+                const message = err instanceof Error ? err.message : "Failed to connect";
+                setError(message);
                 setConnecting(false);
                 toast.error("Failed to connect to counselor");
             }
@@ -291,6 +372,7 @@ export default function AnamVideoCallInterface({ onEndCall, personaConfig, langu
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900/95 z-20">
                         <Loader2 className="w-16 h-16 text-orange-500 animate-spin" />
                         <p className="text-white text-xl font-bold">Connecting to your Counselor...</p>
+                        <p className="text-slate-300 text-sm text-center max-w-md px-6">{connectionStatus}</p>
                     </div>
                 )}
 
